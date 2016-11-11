@@ -110,6 +110,24 @@
                     android:layout_height="match_parent"
                     android:layout_weight="0.43"/>
             </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <CheckBox
+                    android:id="@+id/trackFacesCheckBox"
+                    android:layout_width="128dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:text="@string/crime_faces_label"/>
+
+                <TextView
+                    android:text="Face Tracking Disabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/faceStatusView"/>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

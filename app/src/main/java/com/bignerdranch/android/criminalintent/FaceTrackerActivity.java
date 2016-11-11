@@ -24,12 +24,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 
 import com.bignerdranch.android.criminalintent.camera.CameraSourcePreview;
@@ -37,6 +41,7 @@ import com.bignerdranch.android.criminalintent.camera.GraphicOverlay;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
@@ -61,6 +66,7 @@ public final class FaceTrackerActivity extends AppCompatActivity
     private GraphicOverlay mGraphicOverlay;
 
     private String mFilename;
+    private FaceDetector detector;
 
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
@@ -138,7 +144,7 @@ public final class FaceTrackerActivity extends AppCompatActivity
     private void createCameraSource() {
 
         Context context = getApplicationContext();
-        FaceDetector detector = new FaceDetector.Builder(context)
+        detector = new FaceDetector.Builder(context)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .build();
 
@@ -185,9 +191,28 @@ public final class FaceTrackerActivity extends AppCompatActivity
                     outStream.write(bytes);
                     outStream.close();
                     ContentResolver resolver = getContentResolver();
-                    MediaStore.Images.Media.insertImage(resolver, mFilename, "Crime Photo", "Taken with the CriminalIntent app.");
+                    MediaStore.Images.Media.insertImage(resolver, mFilename, "Crime Photo", "Taken with the CriminalIntent app."); //Save image
+
+                    //Recognize faces
+                    //http://stackoverflow.com/questions/33509217/face-detection-not-working
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferQualityOverSpeed = true;
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    options.inMutable = true;
+                    Bitmap temp = BitmapFactory.decodeByteArray(bytes, 0,
+                            bytes.length, options);
+                    Frame frame = new Frame.Builder().setBitmap(temp).build();
+
+                    FaceDetector faceDetector = new FaceDetector.Builder(getApplicationContext())
+                            .setTrackingEnabled(false)
+                            .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                            .build();
+
+                    SparseArray<Face> faces = faceDetector.detect(frame);
+
+                    //Return
                     Intent intent = new Intent();
-                    intent.putExtra("faces", "100"); //TODO: check how many faces
+                    intent.putExtra("faces", Integer.toString(faces.size()));
                     setResult(RESULT_OK, intent);
                     finish();
                 } catch (FileNotFoundException e)
