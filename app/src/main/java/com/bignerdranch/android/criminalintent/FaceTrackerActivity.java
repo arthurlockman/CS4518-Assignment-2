@@ -19,10 +19,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +42,9 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -53,6 +59,8 @@ public final class FaceTrackerActivity extends AppCompatActivity
 
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
+
+    private String mFilename;
 
     private static final int RC_HANDLE_GMS = 9001;
     // permission request codes need to be < 256
@@ -80,6 +88,13 @@ public final class FaceTrackerActivity extends AppCompatActivity
             createCameraSource();
         } else {
             requestCameraPermission();
+        }
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null)
+        {
+            mFilename = extras.getString("filename");
+            System.out.println(mFilename);
         }
     }
 
@@ -148,6 +163,42 @@ public final class FaceTrackerActivity extends AppCompatActivity
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedFps(30.0f)
                 .build();
+    }
+
+    public void takeAndSavePhoto(View v)
+    {
+        mCameraSource.takePicture(new CameraSource.ShutterCallback()
+        {
+            @Override
+            public void onShutter()
+            {
+
+            }
+        }, new CameraSource.PictureCallback()
+        {
+            @Override
+            public void onPictureTaken(byte[] bytes)
+            {
+                File out = new File(mFilename);
+                try {
+                    FileOutputStream outStream = new FileOutputStream(out);
+                    outStream.write(bytes);
+                    outStream.close();
+                    ContentResolver resolver = getContentResolver();
+                    MediaStore.Images.Media.insertImage(resolver, mFilename, "Crime Photo", "Taken with the CriminalIntent app.");
+                    Intent intent = new Intent();
+                    intent.putExtra("faces", "100"); //TODO: check how many faces
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } catch (FileNotFoundException e)
+                {
+                    e.printStackTrace();
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**

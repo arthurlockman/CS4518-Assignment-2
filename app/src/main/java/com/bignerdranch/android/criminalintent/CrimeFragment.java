@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -42,6 +43,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO= 2;
+    private static final int REQUEST_FACES = 3; //For face tracking view
 
     private Crime mCrime;
     private File mPhotoFilePrimary;
@@ -206,10 +208,13 @@ public class CrimeFragment extends Fragment {
                         photoFile = mPhotoFilePrimary;
                         break;
                 }
-                Uri uri = Uri.fromFile(photoFile); //Fill selected slot
-                CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
-                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(captureImage, REQUEST_PHOTO);
+                Intent i = new Intent(getContext(), FaceTrackerActivity.class);
+                i.putExtra("filename", photoFile.getPath());
+                startActivityForResult(i, REQUEST_FACES);
+//                Uri uri = Uri.fromFile(photoFile); //Fill selected slot
+//                CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
+//                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+//                startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
 
@@ -291,6 +296,11 @@ public class CrimeFragment extends Fragment {
             {
                 e.printStackTrace();
             }
+            updatePhotoView();
+        } else if (requestCode == REQUEST_FACES)
+        {
+            String stredittext=data.getStringExtra("faces");
+            System.out.println(stredittext);
             updatePhotoView();
         }
     }

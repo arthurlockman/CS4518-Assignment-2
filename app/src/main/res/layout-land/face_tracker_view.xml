@@ -12,7 +12,8 @@
       android:text="Take Photo"
       android:layout_width="match_parent"
       android:id="@+id/takePhotoButton"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content"
+      android:onClick="takeAndSavePhoto"/>
 
   <com.bignerdranch.android.criminalintent.camera.CameraSourcePreview
       android:id="@+id/preview"
