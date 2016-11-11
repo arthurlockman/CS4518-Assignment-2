@@ -16,6 +16,8 @@ The issue in the gradle build file `./app/build.gradle` was that the `compileSdk
 
 The goal of this section was to make it so that the app could take more images. It required adding three additional image slots below the application view, and filling those with new images that are taken.
 
+To display more images, I first added three more `ImageView` elements to the bottom of the view, along with a label. 
+
 ### 3.3: Recycle views (30 points)
 
 The goal of this portion was to modify how images were taken, so that only 4 additional images could be taken and stored as part of the application. If a user took more than 4 images, subsequent images would replace the previous ones in order of their position on screen.

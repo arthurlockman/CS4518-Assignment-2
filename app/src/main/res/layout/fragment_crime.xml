@@ -44,6 +44,13 @@
         android:text="@string/crime_report_text"
         />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/crime_more_images"
+        style="?android:listSeparatorTextViewStyle"
+        android:id="@+id/textView"
+        />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="wrap_content"
