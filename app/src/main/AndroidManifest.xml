@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bignerdranch.android.criminalintent" >
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-                     android:maxSdkVersion="18"
-        />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--Adding for image save to gallery-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.camera"
                   android:required="false"
         />

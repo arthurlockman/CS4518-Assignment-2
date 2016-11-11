@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -28,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -261,6 +264,33 @@ public class CrimeFragment extends Fragment {
                 c.close();
             }
         } else if (requestCode == REQUEST_PHOTO) {
+            ContentResolver resolver = getActivity().getContentResolver();
+            File photoFile;
+            switch (mLastPhoto) //Switch which photo to save to gallery
+            {
+                case 0:
+                    photoFile = mPhotoFilePrimary;
+                    break;
+                case 1:
+                    photoFile = mPhotoFileSecondary1;
+                    break;
+                case 2:
+                    photoFile = mPhotoFileSecondary2;
+                    break;
+                case 3:
+                    photoFile = mPhotoFileSecondary3;
+                    break;
+                default:
+                    photoFile = mPhotoFilePrimary;
+                    break;
+            }
+            try
+            {
+                MediaStore.Images.Media.insertImage(resolver, photoFile.getPath(), "Crime Photo", "Taken with the CriminalIntent app.");
+            } catch (FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
             updatePhotoView();
         }
     }
