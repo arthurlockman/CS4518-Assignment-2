@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -28,6 +29,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +44,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO= 2;
+    private static final int REQUEST_FACES = 3; //For face tracking view
 
     private Crime mCrime;
     private File mPhotoFilePrimary;
@@ -51,6 +54,7 @@ public class CrimeFragment extends Fragment {
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckbox;
+    private CheckBox mTrackFacesCheckbox; //Enable/disable face tracking
     private Button mReportButton;
     private Button mSuspectButton;
     private ImageButton mPhotoButton;
@@ -59,6 +63,8 @@ public class CrimeFragment extends Fragment {
     private ImageView mPhotoViewSecondary2; //Adding to support the other 3 image views
     private ImageView mPhotoViewSecondary3; //Adding to support the other 3 image views
     private int mLastPhoto; //Stores which photo was last taken
+    private boolean mFaceTrackingEnabled; //Stores if face tracking is enabled or not.
+    private TextView mFaceStatusView;
 
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -136,6 +142,26 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mFaceStatusView = (TextView) v.findViewById(R.id.faceStatusView);
+        mFaceStatusView.setText("Face Tracking Disabled");
+        mTrackFacesCheckbox = (CheckBox) v.findViewById(R.id.trackFacesCheckBox);
+        mTrackFacesCheckbox.setChecked(false);
+        mFaceTrackingEnabled = false;
+        mTrackFacesCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
+            {
+                mFaceTrackingEnabled = b;
+                if (b)
+                {
+                    mFaceStatusView.setText("Waiting for image...");
+                } else {
+                    mFaceStatusView.setText("Face Tracking Disabled");
+                }
+            }
+        });
+
         mReportButton = (Button)v.findViewById(R.id.crime_report);
         mReportButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -206,10 +232,18 @@ public class CrimeFragment extends Fragment {
                         photoFile = mPhotoFilePrimary;
                         break;
                 }
-                Uri uri = Uri.fromFile(photoFile); //Fill selected slot
-                CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
-                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(captureImage, REQUEST_PHOTO);
+                if (mFaceTrackingEnabled)
+                {
+                    Intent i = new Intent(getContext(), FaceTrackerActivity.class); //TODO: Switch which view to pop up
+                    i.putExtra("filename", photoFile.getPath());
+                    startActivityForResult(i, REQUEST_FACES);
+                } else
+                {
+                    Uri uri = Uri.fromFile(photoFile); //Fill selected slot
+                    CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
+                    captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    startActivityForResult(captureImage, REQUEST_PHOTO);
+                }
             }
         });
 
@@ -291,6 +325,11 @@ public class CrimeFragment extends Fragment {
             {
                 e.printStackTrace();
             }
+            updatePhotoView();
+        } else if (requestCode == REQUEST_FACES)
+        {
+            String numFaces = data.getStringExtra("faces");
+            mFaceStatusView.setText("Found " + numFaces + " faces.");
             updatePhotoView();
         }
     }

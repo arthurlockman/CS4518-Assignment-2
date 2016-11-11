@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!--Adding for image save to gallery-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera"
                   android:required="false"
         />
@@ -27,6 +28,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+        </activity>
+        <activity android:name=".FaceTrackerActivity"
+            android:parentActivityName=".CrimePagerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_DOCUMENT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
         </activity>
     </application>
 
