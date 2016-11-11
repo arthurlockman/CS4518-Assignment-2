@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -40,14 +41,22 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_PHOTO= 2;
 
     private Crime mCrime;
-    private File mPhotoFile;
+    private File mPhotoFilePrimary;
+    private File mPhotoFileSecondary1; //Adding to support the other 3 image views
+    private File mPhotoFileSecondary2; //Adding to support the other 3 image views
+    private File mPhotoFileSecondary3; //Adding to support the other 3 image views
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckbox;
     private Button mReportButton;
     private Button mSuspectButton;
     private ImageButton mPhotoButton;
-    private ImageView mPhotoView;
+    private ImageView mPhotoViewPrimary;
+    private ImageView mPhotoViewSecondary1; //Adding to support the other 3 image views
+    private ImageView mPhotoViewSecondary2; //Adding to support the other 3 image views
+    private ImageView mPhotoViewSecondary3; //Adding to support the other 3 image views
+    private int mLastPhoto; //Stores which photo was last taken
+
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -63,7 +72,11 @@ public class CrimeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
-        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
+        mPhotoFilePrimary = CrimeLab.get(getActivity()).getPhotoFile(mCrime, 0);
+        mPhotoFileSecondary1 = CrimeLab.get(getActivity()).getPhotoFile(mCrime, 1);
+        mPhotoFileSecondary2 = CrimeLab.get(getActivity()).getPhotoFile(mCrime, 2);
+        mPhotoFileSecondary3 = CrimeLab.get(getActivity()).getPhotoFile(mCrime, 3);
+        mLastPhoto = 3;
     }
 
     @Override
@@ -156,23 +169,52 @@ public class CrimeFragment extends Fragment {
         mPhotoButton = (ImageButton) v.findViewById(R.id.crime_camera);
         final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        boolean canTakePhoto = mPhotoFile != null &&
+        boolean canTakePhoto = mPhotoFilePrimary != null &&
                 captureImage.resolveActivity(packageManager) != null;
         mPhotoButton.setEnabled(canTakePhoto);
 
         if (canTakePhoto) {
-            Uri uri = Uri.fromFile(mPhotoFile);
+            Uri uri = Uri.fromFile(mPhotoFilePrimary); //Start with primary slot
+            CrimeLab.get(getActivity()).setLastPhoto(mCrime, 3); //Store last taken photo
             captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
 
         mPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //On click, select a new photo slot to fill
+                mLastPhoto = (mLastPhoto >= 3) ? 0 : mLastPhoto + 1;
+                File photoFile;
+                switch (mLastPhoto) //Switch which photo slot to fill
+                {
+                    case 0:
+                        photoFile = mPhotoFilePrimary;
+                        break;
+                    case 1:
+                        photoFile = mPhotoFileSecondary1;
+                        break;
+                    case 2:
+                        photoFile = mPhotoFileSecondary2;
+                        break;
+                    case 3:
+                        photoFile = mPhotoFileSecondary3;
+                        break;
+                    default:
+                        photoFile = mPhotoFilePrimary;
+                        break;
+                }
+                Uri uri = Uri.fromFile(photoFile); //Fill selected slot
+                CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
+                captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
         });
 
-        mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+        mPhotoViewPrimary = (ImageView) v.findViewById(R.id.crime_photo);
+        mPhotoViewSecondary1 = (ImageView) v.findViewById(R.id.crime_photo_secondary_1); //Initializing new photo views
+        mPhotoViewSecondary2 = (ImageView) v.findViewById(R.id.crime_photo_secondary_2); //Initializing new photo views
+        mPhotoViewSecondary3 = (ImageView) v.findViewById(R.id.crime_photo_secondary_3); //Initializing new photo views
+
         updatePhotoView();
 
         return v;
@@ -248,12 +290,33 @@ public class CrimeFragment extends Fragment {
     }
 
     private void updatePhotoView() {
-        if (mPhotoFile == null || !mPhotoFile.exists()) {
-            mPhotoView.setImageDrawable(null);
+        if (mPhotoFilePrimary == null || !mPhotoFilePrimary.exists()) {
+            mPhotoViewPrimary.setImageDrawable(null);
         } else {
             Bitmap bitmap = PictureUtils.getScaledBitmap(
-                    mPhotoFile.getPath(), getActivity());
-            mPhotoView.setImageBitmap(bitmap);
+                    mPhotoFilePrimary.getPath(), getActivity());
+            mPhotoViewPrimary.setImageBitmap(bitmap);
+        }
+        if (mPhotoFileSecondary1 == null || !mPhotoFileSecondary1.exists()) { //Draw new photo view
+            mPhotoViewSecondary1.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    mPhotoFileSecondary1.getPath(), getActivity());
+            mPhotoViewSecondary1.setImageBitmap(bitmap);
+        }
+        if (mPhotoFileSecondary2 == null || !mPhotoFileSecondary2.exists()) { //Draw new photo view
+            mPhotoViewSecondary2.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    mPhotoFileSecondary2.getPath(), getActivity());
+            mPhotoViewSecondary2.setImageBitmap(bitmap);
+        }
+        if (mPhotoFileSecondary3 == null || !mPhotoFileSecondary3.exists()) { //Draw new photo view
+            mPhotoViewSecondary3.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    mPhotoFileSecondary3.getPath(), getActivity());
+            mPhotoViewSecondary3.setImageBitmap(bitmap);
         }
     }
 }

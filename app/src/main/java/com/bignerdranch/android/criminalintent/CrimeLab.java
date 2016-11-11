@@ -75,7 +75,7 @@ public class CrimeLab {
         }
     }
 
-    public File getPhotoFile(Crime crime) {
+    public File getPhotoFile(Crime crime, int idx) {
         File externalFilesDir = mContext
                 .getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
@@ -83,7 +83,25 @@ public class CrimeLab {
             return null;
         }
 
-        return new File(externalFilesDir, crime.getPhotoFilename());
+        return new File(externalFilesDir, crime.getPhotoFilename(idx));
+    }
+
+    /**
+     * Get the last taken photo for a given crime.
+     * @param crime The crime.
+     * @return An int, the last photo taken.
+     */
+    public int getLastPhoto(Crime crime) {
+        return crime.getmLastPhoto();
+    }
+
+    /**
+     * Set the last photo taken for a crime.
+     * @param crime The crime.
+     * @param last An index of the last photo taken.
+     */
+    public void setLastPhoto(Crime crime, int last) {
+        crime.setmLastPhoto(last);
     }
 
     public void updateCrime(Crime crime) {

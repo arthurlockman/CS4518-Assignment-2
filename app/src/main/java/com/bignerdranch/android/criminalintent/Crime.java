@@ -10,6 +10,7 @@ public class Crime {
     private Date mDate;
     private boolean mSolved;
     private String mSuspect;
+    private int mLastPhoto; //Stores the last taken photo for this crime
 
     public Crime() {
         this(UUID.randomUUID());
@@ -18,6 +19,7 @@ public class Crime {
     public Crime(UUID id) {
         mId = id;
         mDate = new Date();
+        mLastPhoto = 0;
     }
     public UUID getId() {
         return mId;
@@ -55,7 +57,17 @@ public class Crime {
         mSuspect = suspect;
     }
 
-    public String getPhotoFilename() {
-        return "IMG_" + getId().toString() + ".jpg";
+    public String getPhotoFilename(int idx) {
+        return "IMG_" + getId().toString() + idx + ".jpg";
+    }
+
+    public int getmLastPhoto()
+    {
+        return mLastPhoto;
+    }
+
+    public void setmLastPhoto(int mLastPhoto)
+    {
+        this.mLastPhoto = mLastPhoto;
     }
 }
