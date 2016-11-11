@@ -28,6 +28,14 @@
             </intent-filter>
 
         </activity>
+        <activity android:name=".FaceTrackerActivity"
+            android:parentActivityName=".CrimePagerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_DOCUMENT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
