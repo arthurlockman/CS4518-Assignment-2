@@ -64,7 +64,7 @@ public class CrimeFragment extends Fragment {
     private ImageView mPhotoViewSecondary3; //Adding to support the other 3 image views
     private int mLastPhoto; //Stores which photo was last taken
     private boolean mFaceTrackingEnabled; //Stores if face tracking is enabled or not.
-    private TextView mFaceStatusView;
+    private TextView mFaceStatusView; //Shows how many faces were found in last photo
 
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -152,7 +152,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b)
             {
-                mFaceTrackingEnabled = b;
+                mFaceTrackingEnabled = b; //Change whether or not face tracking is enabled
                 if (b)
                 {
                     mFaceStatusView.setText("Waiting for image...");
@@ -234,11 +234,13 @@ public class CrimeFragment extends Fragment {
                 }
                 if (mFaceTrackingEnabled)
                 {
-                    Intent i = new Intent(getContext(), FaceTrackerActivity.class); //TODO: Switch which view to pop up
+                	//If face tracking is on, use face tracking UI
+                    Intent i = new Intent(getContext(), FaceTrackerActivity.class);
                     i.putExtra("filename", photoFile.getPath());
                     startActivityForResult(i, REQUEST_FACES);
                 } else
                 {
+                	//If face tracking is off, use regular UI
                     Uri uri = Uri.fromFile(photoFile); //Fill selected slot
                     CrimeLab.get(getActivity()).setLastPhoto(mCrime, mLastPhoto); //Store last taken photo
                     captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
@@ -320,6 +322,7 @@ public class CrimeFragment extends Fragment {
             }
             try
             {
+            	//Write image to gallery
                 MediaStore.Images.Media.insertImage(resolver, photoFile.getPath(), "Crime Photo", "Taken with the CriminalIntent app.");
             } catch (FileNotFoundException e)
             {
@@ -328,6 +331,7 @@ public class CrimeFragment extends Fragment {
             updatePhotoView();
         } else if (requestCode == REQUEST_FACES)
         {
+        	//Handle when the face detection activity returns
             String numFaces = data.getStringExtra("faces");
             mFaceStatusView.setText("Found " + numFaces + " faces.");
             updatePhotoView();

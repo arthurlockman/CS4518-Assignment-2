@@ -84,6 +84,10 @@ On my testing device, images taken with the `MediaStore.ACTION_IMAGE_CAPTURE` in
 
 The goal of this section is to enable face detection in the image preview window.
 
+To do this, I brought in the example code posted by the professor on InstructAssist and created a new activity called `FaceTrackerActivity`. Once brought in to the project, I modified the activity to have a "take image" button, and the ability to save an image to disk. This activity also takes in an image path to save the image to, and returns a string with a count of the number of faces found in the image that was just taken. 
+
+In order to enable this new face tracking activity, I modified my original code to include a checkbox to enable and disable face tracking, and a status label that shows the number of faces found in the last image taken. When a user requests to taken an image by pressing the button on screen, the user gets the interface that does face tracking if that check box is on, or the regular image taking interface if the check box is off. Images taken either way are stored into the gallery, and in the correct slots in the UI.
+
 ### 3.6: Target API Level 25 (Extra 10 points)
 
-The goal of this section was to update the app to be compliant with the latest API level of 25. 
+The goal of this section was to update the app to be compliant with the latest API level of 25. I did not complete this portion, since I did not have a physical testing device at this API level, and the simulator is unusably slow on my machine. 

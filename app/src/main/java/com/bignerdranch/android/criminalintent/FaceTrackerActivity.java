@@ -171,6 +171,9 @@ public final class FaceTrackerActivity extends AppCompatActivity
                 .build();
     }
 
+	/**
+	 * Take a photo, and save it to disk. Return information back to the main activity.
+	 */
     public void takeAndSavePhoto(View v)
     {
         mCameraSource.takePicture(new CameraSource.ShutterCallback()
@@ -187,6 +190,7 @@ public final class FaceTrackerActivity extends AppCompatActivity
             {
                 File out = new File(mFilename);
                 try {
+                	//Write file out to the android gallery.
                     FileOutputStream outStream = new FileOutputStream(out);
                     outStream.write(bytes);
                     outStream.close();
@@ -210,7 +214,7 @@ public final class FaceTrackerActivity extends AppCompatActivity
 
                     SparseArray<Face> faces = faceDetector.detect(frame);
 
-                    //Return
+                    //Return number of faces found.
                     Intent intent = new Intent();
                     intent.putExtra("faces", Integer.toString(faces.size()));
                     setResult(RESULT_OK, intent);
